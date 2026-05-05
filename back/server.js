@@ -7,15 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Configuração do banco de dados
-const dbConfig = {
-    host: 'localhost',
-    user: 'root', // Alterar para o usuário correspondente
-    password: '', // Alterar para a senha correspondente
-    database: 'exemplos'
-};
-
-const pool = mysql.createPool(dbConfig);
+const pool = require('./db')
 
 pool.getConnection()
     .then(connection => {
