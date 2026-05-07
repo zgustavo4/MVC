@@ -9,20 +9,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-<<<<<<< HEAD
-// DB
-const dbConfig = {
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
-    port: process.env.DB_PORT
-};
 
 const pool = mysql.createPool(dbConfig);
-=======
 const pool = require('./db')
->>>>>>> 2c501fdc4768a253d7b050c009f6cb16a34f4fee
 
 // TESTE CONEXÃO
 pool.getConnection()
