@@ -19,126 +19,155 @@ pool.getConnection()
         console.error('❌ Erro ao conectar:', err.message);
     });
 
-/* =========================
-   PRODUTOS
-========================= */
-
-// GET
-app.get('/produtos', async (req, res) => {
+// Rota GET - Listar todos
+app.get('/pessoas', async (req, res) => {
     try {
-        const [rows] = await pool.execute('SELECT * FROM produtos');
+        const [rows] = await pool.execute('SELECT * FROM pessoas');
         res.json(rows);
     } catch (error) {
-        console.error("ERRO GET:", error);
         res.status(500).json({ error: error.message });
     }
 });
 
-// POST
-app.post('/produtos', async (req, res) => {
-    console.log("BODY RECEBIDO:", req.body); // 👈 DEBUG
-
-    const { nome, descricao, preco, estoque, categoria } = req.body;
-
-    // 🔥 VALIDAÇÃO
-    if (!nome || preco === undefined) {
-        return res.status(400).json({ message: "Nome e preço são obrigatórios" });
-    }
+// Rota POST - Criar
+app.post('/pessoas', async (req, res) => {
+    const { 
+        nome_razao_social, nome_social_fantasia, cep, endereco, 
+        numero, bairro, cidade, estado, pais, documento, tipo, email 
+    } = req.body;
 
     const query = `
-        INSERT INTO produtos
-        (nome, descricao, preco, estoque, categoria)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO pessoas 
+        (nome_razao_social, nome_social_fantasia, cep, endereco, numero, bairro, cidade, estado, pais, documento, tipo, email) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
-
+    
     const values = [
-        nome,
-        descricao || null,
-        parseFloat(preco),
-        parseInt(estoque) || 0,
-        categoria || null
+        nome_razao_social, 
+        nome_social_fantasia || null, 
+        cep || null, 
+        endereco || null, 
+        numero || null, 
+        bairro || null, 
+        cidade || null, 
+        estado || null, 
+        pais || 'Brasil', 
+        documento, 
+        tipo, 
+        email || null
     ];
 
     try {
         const [result] = await pool.execute(query, values);
-
-        res.status(201).json({
-            id: result.insertId,
-            nome,
-            descricao,
-            preco,
-            estoque,
-            categoria
-        });
-
+        res.status(201).json({ id: result.insertId, ...req.body });
     } catch (error) {
-        console.error("❌ ERRO SQL PRODUTO:", error); // 👈 AGORA VOCÊ VÊ O ERRO
         res.status(500).json({ error: error.message });
     }
 });
 
-//teste comit
-
-// PUT
-app.put('/produtos/:id', async (req, res) => {
+// Rota PUT - Atualizar
+app.put('/pessoas/:id', async (req, res) => {
     const { id } = req.params;
-    const { nome, descricao, preco, estoque, categoria } = req.body;
+    const { 
+        nome_razao_social, nome_social_fantasia, cep, endereco, 
+        numero, bairro, cidade, estado, pais, documento, tipo, email 
+    } = req.body;
 
     const query = `
-        UPDATE produtos
-        SET nome = ?, descricao = ?, preco = ?, estoque = ?, categoria = ?
+        UPDATE pessoas 
+        SET nome_razao_social = ?, nome_social_fantasia = ?, cep = ?, endereco = ?, 
+            numero = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, documento = ?, 
+            tipo = ?, email = ? 
         WHERE id = ?
     `;
-
+    
     const values = [
-        nome,
-        descricao || null,
-        parseFloat(preco),
-        parseInt(estoque) || 0,
-        categoria || null,
-        id
+        nome_razao_social, nome_social_fantasia || null, cep || null, endereco || null, 
+        numero || null, bairro || null, cidade || null, estado || null, pais || 'Brasil', 
+        documento, tipo, email || null, id
     ];
 
     try {
         const [result] = await pool.execute(query, values);
-
+        
         if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Produto não encontrado' });
+            return res.status(404).json({ message: 'Registro não encontrado' });
         }
-
         res.json({ id, ...req.body });
-
     } catch (error) {
-        console.error("❌ ERRO UPDATE:", error);
         res.status(500).json({ error: error.message });
     }
 });
 
-// DELETE
-app.delete('/produtos/:id', async (req, res) => {
+// Rota DELETE - Remover
+app.delete('/pessoas/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const [result] = await pool.execute(
-            'DELETE FROM produtos WHERE id = ?',
-            [id]
-        );
+        const [result] = await pool.execute('DELETE FROM pessoas WHERE id = ?', [id]);
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Produto não encontrado' });
+            return res.status(404).json({ message: 'Registro não encontrado' });
         }
-
         res.status(204).send();
-
     } catch (error) {
-        console.error("❌ ERRO DELETE:", error);
         res.status(500).json({ error: error.message });
     }
 });
 
-/* =========================
-   START
-========================= */
+app.get('/produtos', async (req, res) => {
+    try {
+        const [resultado] = await pool.query("select * from produtos")
+        res.status(201).json({"resposta": resultado})
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+})
+
+app.post('/inserir_produtos', async (req, res) => {
+    try {
+        const {id, nome, descricao, preco, estoque, categoria} = req.body
+    
+        const sql = `insert into produtos (nome, descricao, preco, estoque, categoria) values (?,?,?,?,?)`
+        const [resultado] = await pool.query(sql, [nome, descricao, preco, estoque, categoria])
+        res.status(201).json({"resposta": resultado})
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+})
+
+app.put('/atualizar_produtos', async (req, res) => {
+    try {
+        const {id, nome, descricao, preco, estoque, categoria} = req.body
+        const sql = `update produtos  set nome = ?, descricao = ?, preco =? , estoque = ?, categoria = ? where id = ?`
+        const [resultado] = await pool.query(sql, [nome, descricao, preco, estoque, categoria, id])
+
+        if (resultado.affectedRows === 0) {
+            return res.status(404).json({ message: 'Registro não encontrado' });
+        }
+
+        res.status(201).json({"resposta": resultado})
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+})
+
+
+app.delete('/apagar_produtos', async (req, res) => {
+    try {
+        const {id} = req.body
+        const sql = 'delete from produtos where id = ?'
+        const [resultado] = await pool.query(sql, [id])
+
+        if (resultado.affectedRows === 0) {
+            return res.status(404).json({ message: 'Registro não encontrado' });
+        }
+
+        res.status(201).json({"resposta": resultado})
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+})
 
 const PORT = process.env.PORT || 3000;
 
