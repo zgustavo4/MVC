@@ -1,16 +1,11 @@
 require('dotenv').config()
-
 const express = require('express');
 const cors = require('cors');
-const mysql = require('mysql2/promise');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-
-
-const pool = mysql.createPool(dbConfig);
 const pool = require('./db')
 
 // TESTE CONEXÃO
@@ -23,82 +18,156 @@ pool.getConnection()
         console.error('❌ Erro ao conectar:', err.message);
     });
 
-/* =========================
-   PRODUTOS
-========================= */
-
-// GET
-app.get('/produtos', async (req, res) => {
+// Rota GET - Listar todos
+app.get('/pessoas', async (req, res) => {
     try {
-        const [rows] = await pool.execute('SELECT * FROM produtos');
+        const [rows] = await pool.execute('SELECT * FROM pessoas');
         res.json(rows);
     } catch (error) {
-        console.error("ERRO GET:", error);
         res.status(500).json({ error: error.message });
     }
 });
 
-// POST
-app.post('/produtos', async (req, res) => {
-    console.log("BODY RECEBIDO:", req.body); // 👈 DEBUG
-
-    const { nome, descricao, preco, estoque, categoria } = req.body;
-
-    // 🔥 VALIDAÇÃO
-    if (!nome || preco === undefined) {
-        return res.status(400).json({ message: "Nome e preço são obrigatórios" });
-    }
+// Rota POST - Criar
+app.post('/pessoas', async (req, res) => {
+    const {
+        nome_razao_social, nome_social_fantasia, cep, endereco,
+        numero, bairro, cidade, estado, pais, documento, tipo, email
+    } = req.body;
 
     const query = `
-        INSERT INTO produtos
-        (nome, descricao, preco, estoque, categoria)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO pessoas 
+        (nome_razao_social, nome_social_fantasia, cep, endereco, numero, bairro, cidade, estado, pais, documento, tipo, email) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const values = [
-        nome,
-        descricao || null,
-        parseFloat(preco),
-        parseInt(estoque) || 0,
-        categoria || null
+        nome_razao_social,
+        nome_social_fantasia || null,
+        cep || null,
+        endereco || null,
+        numero || null,
+        bairro || null,
+        cidade || null,
+        estado || null,
+        pais || 'Brasil',
+        documento,
+        tipo,
+        email || null
+    ];
+
+    try {
+        const [result] = await pool.execute(query, values);
+        res.status(201).json({ id: result.insertId, ...req.body });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Rota PUT - Atualizar
+app.put('/pessoas/:id', async (req, res) => {
+    const { id } = req.params;
+    const {
+        nome_razao_social, nome_social_fantasia, cep, endereco,
+        numero, bairro, cidade, estado, pais, documento, tipo, email
+    } = req.body;
+
+    const query = `
+        UPDATE pessoas 
+        SET nome_razao_social = ?, nome_social_fantasia = ?, cep = ?, endereco = ?, 
+            numero = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, documento = ?, 
+            tipo = ?, email = ? 
+        WHERE id = ?
+    `;
+
+    const values = [
+        nome_razao_social, nome_social_fantasia || null, cep || null, endereco || null,
+        numero || null, bairro || null, cidade || null, estado || null, pais || 'Brasil',
+        documento, tipo, email || null, id
     ];
 
     try {
         const [result] = await pool.execute(query, values);
 
-        res.status(201).json({
-            id: result.insertId,
-            nome,
-            descricao,
-            preco,
-            estoque,
-            categoria
-        });
-
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Registro não encontrado' });
+        }
+        res.json({ id, ...req.body });
     } catch (error) {
-        console.error("❌ ERRO SQL PRODUTO:", error); // 👈 AGORA VOCÊ VÊ O ERRO
         res.status(500).json({ error: error.message });
     }
 });
 
-//teste comit
-
-// PUT
-app.put('/produtos/:id', async (req, res) => {
+// Rota DELETE - Remover
+app.delete('/pessoas/:id', async (req, res) => {
     const { id } = req.params;
+
+    try {
+        const [result] = await pool.execute('DELETE FROM pessoas WHERE id = ?', [id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Registro não encontrado' });
+        }
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Rota GET - Listar todos
+app.get('/produtos', async (req, res) => {
+    try {
+        const [rows] = await pool.execute('SELECT * FROM produtos');
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Rota POST - Criar
+app.post('/criarprodutos', async (req, res) => {
     const { nome, descricao, preco, estoque, categoria } = req.body;
 
     const query = `
-        UPDATE produtos
+        INSERT INTO produtos 
+        (nome, descricao, preco, estoque, categoria) 
+        VALUES (?, ?, ?, ?, ?)
+    `;
+
+    const values = [
+        nome || null,
+        descricao || null,
+        preco || null,
+        estoque || null,
+        categoria || null,
+    ];
+
+    try {
+        const [result] = await pool.execute(query, values);
+        res.status(201).json({ id: result.insertId, ...req.body });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Rota PUT - Atualizar
+app.put('/atualizarprodutos/:id', async (req, res) => {
+    const { id } = req.params;
+    const {
+        nome, descricao, preco, estoque, categoria
+    } = req.body;
+
+    const query = `
+        UPDATE produtos 
         SET nome = ?, descricao = ?, preco = ?, estoque = ?, categoria = ?
         WHERE id = ?
     `;
 
     const values = [
-        nome,
+        nome || null,
         descricao || null,
-        parseFloat(preco),
-        parseInt(estoque) || 0,
+        preco || null,
+        estoque || null,
         categoria || null,
         id
     ];
@@ -107,42 +176,29 @@ app.put('/produtos/:id', async (req, res) => {
         const [result] = await pool.execute(query, values);
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Produto não encontrado' });
+            return res.status(404).json({ message: 'Registro não encontrado' });
         }
-
         res.json({ id, ...req.body });
-
     } catch (error) {
-        console.error("❌ ERRO UPDATE:", error);
         res.status(500).json({ error: error.message });
     }
 });
 
-// DELETE
-app.delete('/produtos/:id', async (req, res) => {
+// Rota DELETE - Remover
+app.delete('/deletarprodutos/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const [result] = await pool.execute(
-            'DELETE FROM produtos WHERE id = ?',
-            [id]
-        );
+        const [result] = await pool.execute('DELETE FROM produtos WHERE id = ?', [id]);
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Produto não encontrado' });
+            return res.status(404).json({ message: 'Registro não encontrado' });
         }
-
         res.status(204).send();
-
     } catch (error) {
-        console.error("❌ ERRO DELETE:", error);
         res.status(500).json({ error: error.message });
     }
 });
-
-/* =========================
-   START
-========================= */
 
 const PORT = process.env.PORT || 3000;
 
