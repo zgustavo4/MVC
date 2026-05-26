@@ -1,5 +1,4 @@
 const pool = require('../config/db')
-const { atualizar } = require('./pessoasModel')
 
 const Livro = {
     listarLivros: async () => {

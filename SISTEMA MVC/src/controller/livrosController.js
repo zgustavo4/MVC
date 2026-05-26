@@ -1,5 +1,4 @@
 const Livro = require('../model/livrosModel')
-const { atualizar } = require('../model/pessoasModel')
 
 const livroController = {
     listar: async (req, res) => {
