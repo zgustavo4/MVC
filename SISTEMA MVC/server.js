@@ -29,6 +29,7 @@ app.get('/pessoas', async (req, res) => {
     }
 });
 
+<<<<<<< HEAD
 // Rota POST - Criar
 app.post('/pessoas', async (req, res) => {
     const { 
@@ -473,3 +474,11 @@ app.delete('/pedidos/:id', async (req, res) => {
     }
 
 });
+=======
+const livroRoutes = require('./src/routes/livrosRoutes')
+server.use(livroRoutes)
+
+server.listen(PORT, () =>{
+    console.log(`Servidor rodando em: http://localhost:${PORT}`)
+})
+>>>>>>> 6a47f66950a00d71b3ae79ef8462681d93eaefc8
