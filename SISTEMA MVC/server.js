@@ -18,6 +18,9 @@ server.use(produtoRoutes)
 const livroRoutes = require('./src/routes/livrosRoutes')
 server.use(livroRoutes)
 
+const pedidoRoutes = require('./src/routes/pedidosRoutes')
+server.use(pedidoRoutes)
+
 server.listen(PORT, () =>{
     console.log(`Servidor rodando em: http://localhost:${PORT}`)
 })
