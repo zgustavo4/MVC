@@ -21,6 +21,9 @@ server.use(livroRoutes)
 const pedidoRoutes = require('./src/routes/pedidosRoutes')
 server.use(pedidoRoutes)
 
+const pessoaRoutes = require('./src/routes/pessoasRoutes');
+app.use(pessoaRoutes);
+
 server.listen(PORT, () =>{
     console.log(`Servidor rodando em: http://localhost:${PORT}`)
 })
