@@ -1,4 +1,4 @@
-const pedidos = require('../models/pedidosModel')
+const pedidos = require('../model/pedidosModel')
 
 const pedidosController = {
     listar: async (req, res) => {

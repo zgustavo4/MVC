@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const pedidosController = require('../controllers/pedidosController')
+const pedidosController = require('../controller/pedidosController')
 
 router.get('/pedidos', pedidosController.listar)
 router.post('/pedidos', pedidosController.criar)
