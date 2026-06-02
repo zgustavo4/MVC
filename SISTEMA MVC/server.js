@@ -21,6 +21,9 @@ server.use(livroRoutes)
 const pedidoRoutes = require('./src/routes/pedidosRoutes')
 server.use(pedidoRoutes)
 
+const mesaRoutes = require('./src/routes/mesaRoutes')
+server.use(mesaRoutes)
+
 const fornecedorRoutes = require('./src/routes/fornecedorRoutes')
 server.use(fornecedorRoutes)
 server.listen(PORT, () =>{
