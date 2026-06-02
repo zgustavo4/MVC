@@ -2,40 +2,26 @@ const express = require('express');
 
 const router = express.Router();
 
-const fornecedorController = require('../controllers/fornecedorController');
-
-const {
-    validacoesFornecedor
-} = require('../middlewares/fornecedorValidation');
+const fornecedorController =
+    require('../controller/fornecedorController');
 
 router.get(
     '/fornecedores',
     fornecedorController.listar
 );
 
-router.get(
-    '/fornecedores/create',
-    fornecedorController.createView
-);
-
 router.post(
-    '/fornecedores/create',
-    validacoesFornecedor,
+    '/fornecedores',
     fornecedorController.criar
 );
 
-router.get(
-    '/fornecedores/edit/:id',
-    fornecedorController.editView
-);
-
-router.post(
-    '/fornecedores/edit/:id',
+router.put(
+    '/fornecedores/:id',
     fornecedorController.atualizar
 );
 
-router.get(
-    '/fornecedores/delete/:id',
+router.delete(
+    '/fornecedores/:id',
     fornecedorController.deletar
 );
 

@@ -1,161 +1,90 @@
-const fornecedorModel = require('../models/fornecedorModel');
-
-const { validationResult } = require('express-validator');
+const fornecedorModel = require('../model/fornecedorModel');
 
 module.exports = {
 
-    listar(req, res) {
+    async listar(req, res) {
 
-        fornecedorModel.listar((error, resultados) => {
+        try {
 
-            if (error) {
+            const fornecedores =
+                await fornecedorModel.listar();
 
-                console.log(error);
+            res.json(fornecedores);
 
-                return res.send('Erro ao buscar fornecedores');
-            }
+        } catch (erro) {
 
-            res.render('fornecedores/index', {
-                fornecedores: resultados,
-                sucesso: req.flash('sucesso'),
-                erro: req.flash('erro')
-            });
-        });
-    },
+            console.log(erro);
 
-    createView(req, res) {
-
-        res.render('fornecedores/create', {
-            erros: [],
-            dados: {}
-        });
-    },
-
-    criar(req, res) {
-
-        const erros = validationResult(req);
-
-        if (!erros.isEmpty()) {
-
-            return res.render('fornecedores/create', {
-                erros: erros.array(),
-                dados: req.body
+            res.status(500).json({
+                erro: erro.message
             });
         }
-
-        fornecedorModel.buscarDuplicado(
-            req.body.email,
-            req.body.telefone,
-
-            (error, resultado) => {
-
-                if (error) {
-
-                    console.log(error);
-
-                    return res.send('Erro interno');
-                }
-
-                if (resultado.length > 0) {
-
-                    return res.render('fornecedores/create', {
-                        erros: [
-                            {
-                                msg: 'Fornecedor já cadastrado'
-                            }
-                        ],
-                        dados: req.body
-                    });
-                }
-
-                fornecedorModel.criar(req.body, (error) => {
-
-                    if (error) {
-
-                        console.log(error);
-
-                        return res.send('Erro ao cadastrar');
-                    }
-
-                    req.flash(
-                        'sucesso',
-                        'Fornecedor cadastrado com sucesso'
-                    );
-
-                    res.redirect('/fornecedores');
-                });
-            }
-        );
     },
 
-    editView(req, res) {
+    async criar(req, res) {
 
-        fornecedorModel.buscarPorId(
-            req.params.id,
+        try {
 
-            (error, resultado) => {
+            const resultado =
+                await fornecedorModel.criar(req.body);
 
-                if (error) {
+            res.status(201).json({
+                mensagem: 'Fornecedor cadastrado',
+                id: resultado.insertId
+            });
 
-                    console.log(error);
+        } catch (erro) {
 
-                    return res.send('Erro');
-                }
+            console.log(erro);
 
-                res.render('fornecedores/edit', {
-                    fornecedor: resultado[0],
-                    erros: []
-                });
-            }
-        );
+            res.status(500).json({
+                erro: erro.message
+            });
+        }
     },
 
-    atualizar(req, res) {
+    async atualizar(req, res) {
 
-        fornecedorModel.atualizar(
-            req.params.id,
-            req.body,
+        try {
 
-            (error) => {
+            await fornecedorModel.atualizar(
+                req.params.id,
+                req.body
+            );
 
-                if (error) {
+            res.json({
+                mensagem: 'Fornecedor atualizado'
+            });
 
-                    console.log(error);
+        } catch (erro) {
 
-                    return res.send('Erro ao atualizar');
-                }
+            console.log(erro);
 
-                req.flash(
-                    'sucesso',
-                    'Fornecedor atualizado'
-                );
-
-                res.redirect('/fornecedores');
-            }
-        );
+            res.status(500).json({
+                erro: erro.message
+            });
+        }
     },
 
-    deletar(req, res) {
+    async deletar(req, res) {
 
-        fornecedorModel.desativar(
-            req.params.id,
+        try {
 
-            (error) => {
+            await fornecedorModel.deletar(
+                req.params.id
+            );
 
-                if (error) {
+            res.json({
+                mensagem: 'Fornecedor deletado'
+            });
 
-                    console.log(error);
+        } catch (erro) {
 
-                    return res.send('Erro ao desativar');
-                }
+            console.log(erro);
 
-                req.flash(
-                    'sucesso',
-                    'Fornecedor desativado'
-                );
-
-                res.redirect('/fornecedores');
-            }
-        );
+            res.status(500).json({
+                erro: erro.message
+            });
+        }
     }
 };

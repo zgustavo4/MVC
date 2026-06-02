@@ -2,44 +2,19 @@ const db = require('../config/db');
 
 module.exports = {
 
-    listar(callback) {
+    async listar() {
 
-        const sql = `
-            SELECT *
-            FROM fornecedores
-            ORDER BY nome ASC
-        `;
+        const [resultado] = await db.query(
+            'SELECT * FROM fornecedores'
+        );
 
-        db.query(sql, callback);
+        return resultado;
     },
 
-    buscarPorId(id, callback) {
+    async criar(dados) {
 
-        const sql = `
-            SELECT *
-            FROM fornecedores
-            WHERE id_fornecedor = ?
-        `;
-
-        db.query(sql, [id], callback);
-    },
-
-    buscarDuplicado(email, telefone, callback) {
-
-        const sql = `
-            SELECT *
-            FROM fornecedores
-            WHERE email = ?
-            OR telefone = ?
-        `;
-
-        db.query(sql, [email, telefone], callback);
-    },
-
-    criar(dados, callback) {
-
-        const sql = `
-            INSERT INTO fornecedores
+        const [resultado] = await db.query(
+            `INSERT INTO fornecedores
             (
                 nome,
                 contato,
@@ -49,25 +24,25 @@ module.exports = {
                 produtos_fornecidos,
                 status
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        `;
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+                dados.nome,
+                dados.contato,
+                dados.telefone,
+                dados.email,
+                dados.endereco,
+                dados.produtos_fornecidos,
+                dados.status
+            ]
+        );
 
-        db.query(sql, [
-            dados.nome,
-            dados.contato,
-            dados.telefone,
-            dados.email,
-            dados.endereco,
-            dados.produtos_fornecidos,
-            dados.status
-        ], callback);
+        return resultado;
     },
 
-    atualizar(id, dados, callback) {
+    async atualizar(id, dados) {
 
-        const sql = `
-            UPDATE fornecedores
-            SET
+        const [resultado] = await db.query(
+            `UPDATE fornecedores SET
                 nome = ?,
                 contato = ?,
                 telefone = ?,
@@ -75,29 +50,29 @@ module.exports = {
                 endereco = ?,
                 produtos_fornecidos = ?,
                 status = ?
-            WHERE id_fornecedor = ?
-        `;
+            WHERE id_fornecedor = ?`,
+            [
+                dados.nome,
+                dados.contato,
+                dados.telefone,
+                dados.email,
+                dados.endereco,
+                dados.produtos_fornecidos,
+                dados.status,
+                id
+            ]
+        );
 
-        db.query(sql, [
-            dados.nome,
-            dados.contato,
-            dados.telefone,
-            dados.email,
-            dados.endereco,
-            dados.produtos_fornecidos,
-            dados.status,
-            id
-        ], callback);
+        return resultado;
     },
 
-    desativar(id, callback) {
+    async deletar(id) {
 
-        const sql = `
-            UPDATE fornecedores
-            SET status = 'INATIVO'
-            WHERE id_fornecedor = ?
-        `;
+        const [resultado] = await db.query(
+            'DELETE FROM fornecedores WHERE id_fornecedor = ?',
+            [id]
+        );
 
-        db.query(sql, [id], callback);
+        return resultado;
     }
 };
