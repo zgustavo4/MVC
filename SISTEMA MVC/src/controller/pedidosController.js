@@ -3,8 +3,8 @@ const pedidos = require('../model/pedidosModel')
 const pedidosController = {
     listar: async (req, res) => {
         try {
-            const pedidos = await pedidos.listar
-            res.json(livro)
+            const resultado = await pedidos.listarPedidos()
+            res.json(resultado)
         } catch (error) {
             res.status(500).json({ error: error.message })
         }

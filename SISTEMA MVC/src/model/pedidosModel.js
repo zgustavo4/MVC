@@ -2,15 +2,31 @@ const pool = require('../config/db')
 const { atualizar } = require('./pessoasModel')
 
 const pedidos = {
-    listarLivros: async () => {
+    listarPedidos: async () => {
         const [rows] = await pool.execute('SELECT * FROM pedidos')
         return rows
     },
 
     criar: async (dados) => {
-        const query = `INSERT INTO pedidos data_pedido = ?, nome_cliente = ?, telefone_cliente = ?, itens = ?, observacoes = ?, valor_total = ?, status = ?, tipo_pedido = ?, forma_pagamento = ?, numero_mesa = ?, data_entrega WHERE id = ?`
+        const query = `
+            INSERT INTO pedidos (
+                data_pedido,
+                nome_cliente,
+                telefone_cliente,
+                itens,
+                observacoes,
+                valor_total,
+                status,
+                tipo_pedido,
+                forma_pagamento,
+                numero_mesa,
+                data_entrega
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
         const values = [
-            dados.data_pedido, 
+            dados.data_pedido,
             dados.nome_cliente,
             dados.telefone_cliente,
             dados.itens,
@@ -20,17 +36,31 @@ const pedidos = {
             dados.tipo_pedido,
             dados.forma_pagamento,
             dados.numero_mesa,
-            dados.data_entrega,
-            id
-        ]
-        const [result] = await pool.execute(query, values)
-        return result.insertId
+            dados.data_entrega
+        ];
+
+        const [result] = await pool.execute(query, values);
+        return result.insertId;
     },
-    
+
     atualizar: async (id, dados) => {
-        const query = `UPDATE pedidos SET data_pedido = ?, nome_cliente = ?, telefone_cliente = ?, itens = ?, observacoes = ?, valor_total = ?, status = ?, tipo_pedido = ?, forma_pagamento = ?, numero_mesa = ?, data_entrega WHERE id = ?`
+        const query = `
+        UPDATE pedidos SET
+            data_pedido = ?,
+            nome_cliente = ?,
+            telefone_cliente = ?,
+            itens = ?,
+            observacoes = ?,
+            valor_total = ?,
+            status = ?,
+            tipo_pedido = ?,
+            forma_pagamento = ?,
+            numero_mesa = ?,
+            data_entrega = ?
+            WHERE id = ?
+        `
         const values = [
-            dados.data_pedido, 
+            dados.data_pedido,
             dados.nome_cliente,
             dados.telefone_cliente,
             dados.itens,
